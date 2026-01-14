@@ -78,15 +78,6 @@ public class AirLabService {
                         .queryParam("_fields", "icao_code,iata_code,name,lat,lng,country_code,city")
                         .build())
                 .retrieve()
-                .onStatus(
-                    status -> status.is4xxClientError() || status.is5xxServerError(),
-                    clientResponse -> {
-                        return clientResponse.bodyToMono(String.class)
-                            .map(errorBody -> new AirLabApiException(
-                                String.format("AirLab API error [%s]: %s", 
-                                    clientResponse.statusCode(), errorBody)));
-                    }
-                )
                 .bodyToMono(String.class)
                 .block();
             
@@ -117,7 +108,7 @@ public class AirLabService {
             }
             // Filter duplicates by icaoCode (keep first occurrence)
             List<Airports> airports = response.getResponse().stream()
-                .filter(dto -> dto.getIcaoCode() != null && !dto.getIcaoCode().isEmpty())
+                .filter(dto -> dto.getIcaoCode() != null && !dto.getIcaoCode().isEmpty() && dto.getIataCode() != null && !dto.getIataCode().isEmpty())
                 .collect(Collectors.toMap(
                     AirportDTO::getIcaoCode,
                     airportMapper::toEntity,
@@ -164,15 +155,6 @@ public class AirLabService {
                         .queryParam("_fields", "iata_code,icao_code,name,country_code")
                         .build())
                 .retrieve()
-                .onStatus(
-                    status -> status.is4xxClientError() || status.is5xxServerError(),
-                    clientResponse -> {
-                        return clientResponse.bodyToMono(String.class)
-                            .map(errorBody -> new AirLabApiException(
-                                String.format("AirLab API error [%s]: %s", 
-                                    clientResponse.statusCode(), errorBody)));
-                    }
-                )
                 .bodyToMono(String.class)
                 .block();
             
@@ -246,9 +228,8 @@ public class AirLabService {
         return airlinesRepository.findAll();
     }
    
-    public Airports getAirportByIcaoCode(String icaoCode) {
-        return airportsRepository.findByIcaoCode(icaoCode)
-            .orElseThrow(() -> new AirLabApiException("Airport not found with ICAO code: " + icaoCode));
+    public List<Airports> getAirportByCountryCode(String countryCode) {
+        return airportsRepository.findByCountryCode(countryCode);
     }
     
     public Airlines getAirlineByIataCode(String iataCode) {
@@ -266,15 +247,6 @@ public class AirLabService {
                     .queryParam("api_key", apiKey)
                     .build())
                 .retrieve()
-                .onStatus(
-                    status -> status.is4xxClientError() || status.is5xxServerError(),
-                    clientResponse -> {
-                        return clientResponse.bodyToMono(String.class)
-                            .map(errorBody -> new AirLabApiException(
-                                String.format("AirLab API error [%s]: %s", 
-                                    clientResponse.statusCode(), errorBody)));
-                    }
-                )
                 .bodyToMono(String.class)
                 .block();
             
@@ -427,7 +399,4 @@ public class AirLabService {
         return countriesRepository.findByCode(code)
             .orElseThrow(() -> new AirLabApiException("Country not found with code: " + code));
     }
-    
-
-    
 }
