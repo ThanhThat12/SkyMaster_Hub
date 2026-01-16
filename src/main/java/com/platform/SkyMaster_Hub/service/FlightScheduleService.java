@@ -61,7 +61,7 @@ public class FlightScheduleService {
         return null;
     }
 
-    private void saveToCache(String depIata, List<FlightScheduleDTO> data){
+    private void saveToCache(String depIata, List<FlightSchedules> data){
         Cache cache = cachemanager.getCache("flightSchedules");
         if(cache != null){
             cache.put(depIata, data);
@@ -73,13 +73,11 @@ public class FlightScheduleService {
             List<FlightSchedules> existondata = flightschedulesrepository.findByDepIata(depIata);
 
             if(!existondata.isEmpty()){
-                saveToCache(depIata, existondata.stream()
-                .map(flightScheduleMapper::toDTO)
-                .collect(Collectors.toList()));
-                return existondata.stream()
-                .map(flightScheduleMapper::toDTO)
-                .collect(Collectors.toList());
+                saveToCache(depIata, existondata);
+
+                return getFromCache(depIata);
             }   
+
         try {
             WebClient webclient = webClientBuilder.baseUrl(baseUrl).build();
 
@@ -113,16 +111,12 @@ public class FlightScheduleService {
                 .map(flightScheduleMapper::toEntity)
                 .collect(Collectors.toList());
 
-            List<FlightSchedules> savedSchedules = flightschedulesrepository.saveAll(schedules);
+            flightschedulesrepository.saveAll(schedules);
 
-            List<FlightScheduleDTO> dtoList = savedSchedules.stream()
-                .map(flightScheduleMapper::toDTO)
-                .collect(Collectors.toList());
-            
-            saveToCache(depIata, dtoList);
-
-            return dtoList;
-            }
+            saveToCache(depIata, schedules);     
+ 
+            return getFromCache(depIata);
+        }
         catch(Exception e){
             throw new AirLabApiException("Failed to fetch flight schedules from AirLab API: " + e.getMessage(), e);
         }
