@@ -3,6 +3,7 @@ package com.platform.SkyMaster_Hub.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+
 @Data
 public class FlightScheduleDTO {
 
@@ -11,10 +12,10 @@ public class FlightScheduleDTO {
 
     @JsonProperty("flight_icao")
     private String flightIcao;
-    
+
     @JsonProperty("airline_iata")
     private String airlineIata;
-    
+
     @JsonProperty("dep_iata")
     private String depIata;
 
@@ -26,7 +27,7 @@ public class FlightScheduleDTO {
 
     @JsonProperty("arr_iata")
     private String arrIata;
-    
+
     @JsonProperty("arr_icao")
     private String arrIcao;
 
