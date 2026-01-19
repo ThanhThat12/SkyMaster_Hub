@@ -21,7 +21,7 @@ services:
       retries: 10
 
   app:
-    image: your-dockerhub-username/flight-schedules:latest
+    image: vipcb04/airhub:latest
     container_name: flight-app
     depends_on:
       mysql:
@@ -29,7 +29,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/airlab_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: your_password_here
+      SPRING_DATASOURCE_PASSWORD: 
     ports:
       - "8080:8080"
     networks:
