@@ -1,1 +1,16 @@
+# Maven
+target/
+
+# IDE
+.idea/
+.vscode/
+
+*.class
+
+
+# OS
+.DS_Store
+
+# Config nhạy cảm
 src/main/resources/application.properties
+.env
