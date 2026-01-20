@@ -1,27 +1,14 @@
 version: '3.8'
 
 services:
-  
-
   app:
     image: vipcb04/airhub:latest
     container_name: flight-app
-    depends_on:
-      mysql:
-        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/airlab_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d5n37bdactks73c7lj5g-a.singapore-postgres.render.com:5432/airlab
+      SPRING_DATASOURCE_USERNAME: airlab_user
+      SPRING_DATASOURCE_PASSWORD: ifhIjDDTmlUhT5owTW4oMc1mQhJjeTB9
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     ports:
       - "8080:8080"
-    networks:
-      - flight-network
     restart: unless-stopped
-
-volumes:
-  mysql_data:
-
-networks:
-  flight-network:
-    driver: bridge
