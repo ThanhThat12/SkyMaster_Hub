@@ -28,8 +28,6 @@ public class FlightScheduleService {
         this.flightScheduleMapper = flightScheduleMapper;
     }
 
-    public 
-
     
 
 }
