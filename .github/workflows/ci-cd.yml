@@ -38,7 +38,7 @@ jobs:
         cache-to: type=inline
 
   deploy:
-    name: Deploy to Server
+    name: Deploy to Serverr
     needs: build
     runs-on: ubuntu-latest
 
