@@ -8,5 +8,10 @@
     "name": "airlab.api.base-url",
     "type": "java.lang.String",
     "description": "Base URL for AirLab API"
+  },
+  {
+    "name": "cache.expiration.hours",
+    "type": "java.lang.String",
+    "description": "A description for 'cache.expiration.hours'"
   }
 ]}

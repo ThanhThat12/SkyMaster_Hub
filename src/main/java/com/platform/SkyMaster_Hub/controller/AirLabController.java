@@ -94,14 +94,14 @@ public class AirLabController {
     }
     
     /**
-     * Get airport by ICAO code
-     * GET /api/airlab/airports/{icaoCode}
+     * Get airport by country code
+     * GET /api/airlab/airports/{countryCode}
      */
-    @GetMapping("/airports/{icaoCode}")
-    public ResponseEntity<Airports> getAirportByIcaoCode(@PathVariable String icaoCode) {
+    @GetMapping("/airports/{countryCode}")
+    public ResponseEntity<List<Airports>> getAirportByCountryCode(@PathVariable String countryCode) {
         
-        Airports airport = airLabService.getAirportByIcaoCode(icaoCode);
-        return ResponseEntity.ok(airport);
+        List<Airports> airports = airLabService.getAirportByCountryCode(countryCode);
+        return ResponseEntity.ok(airports);
     }
     
     /**
@@ -165,41 +165,6 @@ public class AirLabController {
     }
     
     
-    // ============= CITIES ENDPOINTS =============
     
-    /**
-     * Fetch and save cities from AirLab API
-     * GET /api/airlab/fetch/cities
-     */
-    @GetMapping("/fetch/cities")
-    public ResponseEntity<Map<String, Object>> fetchCities() {
-        try {
-            List<Cities> cities = airLabService.fetchAndSaveCities();
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Successfully fetched and saved cities");
-            response.put("count", cities.size());
-            response.put("data", cities);
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Failed to fetch cities from AirLab API");
-            errorResponse.put("error", e.getMessage());
-            errorResponse.put("timestamp", java.time.LocalDateTime.now());
-            errorResponse.put("status", 400);
-            
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
-    
-    /**
-     * Get all cities from database
-     * GET /api/airlab/cities
-     */
-    @GetMapping("/cities")
-    public ResponseEntity<List<Cities>> getAllCities() {
-        List<Cities> cities = airLabService.getAllCities();
-        return ResponseEntity.ok(cities);
-    }
+   
 }
