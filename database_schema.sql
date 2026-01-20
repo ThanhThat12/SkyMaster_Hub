@@ -74,87 +74,54 @@ CREATE TABLE IF NOT EXISTS flight_delay (
     INDEX idx_cached_at (cached_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: flights (original table)
-CREATE TABLE IF NOT EXISTS flights (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    flight_iata VARCHAR(10),
-    airline_iata VARCHAR(3),
-    departure_airport VARCHAR(10),
-    arrival_airport VARCHAR(10),
-    departure_time BIGINT,
-    arrival_time BIGINT,
-    estimated_arrival_time BIGINT,
-    status VARCHAR(50),
-    duration INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_airline (airline_iata),
-    INDEX idx_departure (departure_airport),
-    INDEX idx_arrival (arrival_airport),
-    INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Example queries:
---
--- Check total schedules saved:
--- SELECT COUNT(*) FROM schedules;
---
--- View schedules by destination:
--- SELECT * FROM schedules WHERE arr_iata = 'JFK' ORDER BY created_at DESC;
---
--- Count schedules by destination:
--- SELECT arr_iata, arr_airport_name, COUNT(*) as total_flights 
--- FROM schedules 
--- GROUP BY arr_iata, arr_airport_name 
--- ORDER BY total_flights DESC;
---
--- Check cache stats:
--- SELECT 
---     (SELECT COUNT(*) FROM airlines) as total_airlines,
---     (SELECT COUNT(*) FROM airports) as total_airports,
---     (SELECT COUNT(*) FROM schedules) as total_schedules;
---
--- View recently added schedules:
--- SELECT * FROM schedules ORDER BY created_at DESC LIMIT 20;
---
--- Clear schedules (if needed):
--- TRUNCATE TABLE schedules;
-
--- ===================================================================
--- FLIGHT DELAY CACHE QUERIES (Simple version - no cache_key)
--- ===================================================================
-
--- View all cached queries:
--- SELECT query_type, iata_code, min_delay, 
---        COUNT(*) as flights, 
---        MAX(cached_at) as last_cached
--- FROM flight_delay_cache
--- GROUP BY query_type, iata_code, min_delay
--- ORDER BY last_cached DESC;
-
--- View cached flights for specific query:
--- SELECT * FROM flight_delay_cache 
--- WHERE query_type = 'departures' 
---   AND iata_code = 'JFK' 
---   AND min_delay = 30
--- ORDER BY cached_at DESC;
-
--- Check cache freshness:
--- SELECT query_type, iata_code, min_delay,
---        TIMESTAMPDIFF(MINUTE, MAX(cached_at), NOW()) as age_minutes,
---        COUNT(*) as flights
--- FROM flight_delay_cache
--- GROUP BY query_type, iata_code, min_delay
--- ORDER BY age_minutes;
-
--- Clean expired cache (older than 5 minutes):
--- DELETE FROM flight_delay_cache 
--- WHERE TIMESTAMPDIFF(MINUTE, cached_at, NOW()) >= 5;
-
--- Clear specific query cache:
--- DELETE FROM flight_delay_cache
--- WHERE query_type = 'departures' 
---   AND iata_code = 'JFK' 
---   AND min_delay = 30;
-
--- Clear all cache:
--- TRUNCATE TABLE flight_delay_cache;
+CREATE TABLE IF NOT EXISTS realtime_flight (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- Aircraft identification
+    hex VARCHAR(10),
+    reg_number VARCHAR(20),
+    flag VARCHAR(5),
+    
+    -- Position data
+    lat DOUBLE,
+    lng DOUBLE,
+    alt INT,
+    dir DOUBLE,
+    
+    -- Speed data
+    speed INT,
+    v_speed DOUBLE,
+    
+    -- Flight information (IATA only)
+    flight_number VARCHAR(20),
+    flight_iata VARCHAR(20),
+    
+    -- Departure (IATA only)
+    dep_iata VARCHAR(10),
+    
+    -- Arrival (IATA only)
+    arr_iata VARCHAR(10),
+    
+    -- Airline (IATA only)
+    airline_iata VARCHAR(10),
+    
+    -- Aircraft type (keeping ICAO as it's standard)
+    aircraft_icao VARCHAR(10),
+    
+    -- Timestamps
+    updated BIGINT,  -- Unix timestamp from API
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- When we fetched it
+    
+    -- Status
+    status VARCHAR(20),
+    type VARCHAR(20),
+    
+    -- Indexes for performance
+    INDEX idx_dep_iata (dep_iata),
+    INDEX idx_arr_iata (arr_iata),
+    INDEX idx_airline_iata (airline_iata),
+    INDEX idx_flight_iata (flight_iata),
+    INDEX idx_status (status),
+    INDEX idx_updated (updated),
+    INDEX idx_duplicate (flight_iata, updated)
+);

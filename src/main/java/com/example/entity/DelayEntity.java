@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 @Table(name = "flight_delay")
 public class DelayEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     @Column(name = "airline_iata")
     private String airlineIata;
