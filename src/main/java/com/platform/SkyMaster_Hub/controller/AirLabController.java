@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.platform.SkyMaster_Hub.entity.Airlines;
 import com.platform.SkyMaster_Hub.entity.Airports;
-import com.platform.SkyMaster_Hub.entity.Cities;
 import com.platform.SkyMaster_Hub.entity.Countries;
 import com.platform.SkyMaster_Hub.service.AirLabService;
 
