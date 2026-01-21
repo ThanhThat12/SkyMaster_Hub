@@ -8,11 +8,25 @@
 </head>
 <body>
     <div class="container">
-        <h1> Flight Delays Tracker</h1>
+        <h1>Flight Delays Tracker</h1>
 
         <!-- Success/Error Messages -->
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <!-- Info Banner: Show count of stored delays -->
+        <div th:if="${storedCount != null and storedCount > 0}" 
+             style="background: #EBF8FF; border: 1px solid #90CDF4; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">💾</span>
+                <div>
+                    <strong style="color: #2C5282;">Database has <span th:text="${storedCount}">0</span> stored delays</strong>
+                    <p style="margin: 5px 0 0 0; color: #4A5568; font-size: 14px;">
+                        These are delays previously fetched from the API
+                    </p>
+                </div>
+            </div>
+        </div>
 
       
         <div class="section" th:if="${cacheInfo}">
@@ -24,10 +38,6 @@
                     <div class="stat-label">Cache Size</div>
                     <div class="stat-value" th:text="${cacheInfo.size} + ' / ' + ${cacheInfo.capacity}">0 / 3</div>
                 </div>
-                <!-- <div class="stat-box">
-                    <div class="stat-label">Hit Rate</div>
-                    <div class="stat-value" th:text="${cacheInfo.hitRate}">0%</div>
-                </div> -->
                 <div class="stat-box">
                     <div class="stat-label">Total Hits</div>
                     <div class="stat-value" th:text="${cacheInfo.hitCount}">0</div>
@@ -53,8 +63,6 @@
                 </p>
             </div>
 
-           
-
             <!-- Cache Entries List -->
             <div style="margin-top: 25px;">
                 <h3 style="color: #2d3748; margin-bottom: 15px; font-size: 18px;">
@@ -62,7 +70,7 @@
                 </h3>
                 
                 <div class="empty-cache" th:if="${#lists.isEmpty(cacheInfo.entries)}">
-                    <div style="font-size: 48px;"></div>
+                    <div style="font-size: 48px;">📭</div>
                     <p>Cache trống. Hãy fetch data để thấy cache hoạt động!</p>
                 </div>
 
@@ -73,19 +81,17 @@
                         </div>
                         <div class="cache-meta">
                             <span>
-                                 <strong th:text="${entry.flightCount}">0</strong> flights
+                                ✈️ <strong th:text="${entry.flightCount}">0</strong> flights
                             </span>
-                        </span>
-                         <strong th:text="${entry.hitCount}">0</strong> times
-                    </span>
                             <span>
-                                 <strong th:text="${#numbers.formatDecimal(entry.sizeKB, 1, 1)}">0</strong> KB
+                                👁️ <strong th:text="${entry.hitCount}">0</strong> times
+                            </span>
+                            <span>
+                                💾 <strong th:text="${#numbers.formatDecimal(entry.sizeKB, 1, 1)}">0</strong> KB
                             </span>
                         </div>
                     </div>
                 </div>
-
-                
             </div>
         </div>
 
@@ -138,22 +144,52 @@
                                placeholder="LAX" maxlength="3">
                     </div>
                 </div>
-                <button type="submit"> Search</button>
+                <button type="submit">🔍 Search</button>
             </form>
+        </div>
+
+        <!-- Show All Stored Delays Button -->
+        <div class="section" th:if="${storedCount != null and storedCount > 0 and !storedDelaysShown}">
+            <div style="text-align: center; padding: 20px; background: #F7FAFC; border-radius: 8px;">
+                <p style="margin-bottom: 15px; color: #4A5568;">
+                    Want to see all delays previously fetched from the API?
+                </p>
+                <a href="/delays/stored" style="display: inline-block; background: #4299E1; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">
+                     Show All Stored Delays (<span th:text="${storedCount}">0</span>)
+                </a>
+            </div>
         </div>
 
         <!-- Delays Table -->
         <div class="section">
-            <h2> Delayed Flights (<span th:text="${#lists.size(delays)}">0</span>)</h2>
+            <h2>
+                Delayed Flights 
+                <span th:if="${showResults}" th:text="'(' + ${#lists.size(delays)} + ')'">(0)</span>
+            </h2>
             
-            <div class="empty-state" th:if="${#lists.isEmpty(delays)}">
-                <div class="empty-state-icon"></div>
-                <h3>No Delayed Flights</h3>
-                <p th:if="${searchPerformed}">No results found for your search criteria.</p>
-                <p th:unless="${searchPerformed}">Click "Fetch from API" to load flight delay data.</p>
+            <!-- Empty State: Initial page load (no search/fetch yet) -->
+            <div class="empty-state" th:if="${!showResults and #lists.isEmpty(delays)}">
+                <div class="empty-state-icon">🛫</div>
+                <h3>No Flights Displayed</h3>
+                <p style="margin-bottom: 15px;">Use the forms above to:</p>
+                <ul style="text-align: left; display: inline-block; color: #718096;">
+                    <li><strong>Fetch from API</strong> - Get latest delayed flights</li>
+                    <li><strong>Search</strong> - Filter stored delays</li>
+                    <li><strong>Show Stored</strong> - View all previously fetched delays</li>
+                </ul>
             </div>
 
-            <table th:if="${not #lists.isEmpty(delays)}">
+            <!-- Empty State: After search with no results -->
+            <div class="empty-state" th:if="${showResults and #lists.isEmpty(delays)}">
+                <div class="empty-state-icon">🔍</div>
+                <h3>No Results Found</h3>
+                <p th:if="${searchPerformed}">No delays match your search criteria.</p>
+                <p th:if="${storedDelaysShown}">No delays have been stored yet. Try fetching from the API first.</p>
+                <p th:unless="${searchPerformed or storedDelaysShown}">The API returned no delayed flights for this query.</p>
+            </div>
+
+            <!-- Results Table -->
+            <table th:if="${showResults and not #lists.isEmpty(delays)}">
                 <thead>
                     <tr>
                         <th>Flight</th>

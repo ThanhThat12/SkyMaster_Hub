@@ -51,6 +51,53 @@ public class FlightDelayRestController {
         }
     }
     
+    /**
+     * NEW: Get all stored delays from database
+     */
+    @GetMapping("/stored")
+    public ResponseEntity<?> getStoredDelays() {
+        try {
+            List<DelayEntity> delays = flightDelayService.getAllStoredDelays();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("count", delays.size());
+            response.put("data", delays);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    /**
+     * NEW: Get count of stored delays
+     */
+    @GetMapping("/stored/count")
+    public ResponseEntity<?> getStoredCount() {
+        try {
+            long count = flightDelayService.countStoredDelays();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("count", count);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
     
     @PostMapping("/clear-cache")
     public ResponseEntity<?> clearCache() {

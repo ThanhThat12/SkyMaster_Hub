@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -20,16 +21,22 @@ public class FlightDelayController {
     public FlightDelayController(FlightDelayService flightDelayService) {
         this.flightDelayService = flightDelayService;
     }
+    
     @GetMapping
     public String delaysPage(Model model){
-        List<DelayEntity> delays = flightDelayService.searchDelayedFlights(null, null, null);
-        model.addAttribute("delays", delays);
+        // NEW: Don't load any delays initially - show empty page
+        model.addAttribute("delays", new ArrayList<DelayEntity>());
         
+        // Add count of stored delays for info
+        long storedCount = flightDelayService.countStoredDelays();
+        model.addAttribute("storedCount", storedCount);
+        model.addAttribute("storedDelaysShown", false);
         // Add cache info for monitoring
         model.addAttribute("cacheInfo", flightDelayService.getCacheInfo());
-        
+         model.addAttribute("showResults", false);
         return "delays";
     }
+    
     @PostMapping("/fetch")
     public String fetchDelays(
         @RequestParam String type,
@@ -40,12 +47,15 @@ public class FlightDelayController {
             List<DelayEntity> flights = flightDelayService.getDelayedFlights(type, iataCode, minDelay);
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Fetched " + flights.size() + " delayed flights for " + iataCode);
+            redirectAttributes.addFlashAttribute("delays", flights);
+            redirectAttributes.addFlashAttribute("showResults", true);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Error: " + e.getMessage());
         }   
         return "redirect:/delays";
     }
+    
     @GetMapping("/search")
     public String searchDelays(
         @RequestParam(required = false) String iataCode,
@@ -54,8 +64,30 @@ public class FlightDelayController {
         Model model){
         List<DelayEntity> delays = flightDelayService.searchDelayedFlights(iataCode, airline, depIata);
         model.addAttribute("delays", delays);
-        model.addAttribute("searchPerformed", true);   
+        model.addAttribute("searchPerformed", true);
+        model.addAttribute("showResults", true);
+        
+        // Add count and cache info
+        long storedCount = flightDelayService.countStoredDelays();
+        model.addAttribute("storedCount", storedCount);
+        model.addAttribute("cacheInfo", flightDelayService.getCacheInfo());
+        
         return "delays";
-        }
+    }
+    
+    @GetMapping("/stored")
+    public String showStoredDelays(Model model) {
+        List<DelayEntity> delays = flightDelayService.getAllStoredDelays();
+        model.addAttribute("delays", delays);
+        model.addAttribute("showResults", true);
+        model.addAttribute("storedDelaysShown", true);
+        
+        // Add count and cache info
+        long storedCount = flightDelayService.countStoredDelays();
+        model.addAttribute("storedCount", storedCount);
+        model.addAttribute("cacheInfo", flightDelayService.getCacheInfo());
+        
+        return "delays";
+    }
     
 }

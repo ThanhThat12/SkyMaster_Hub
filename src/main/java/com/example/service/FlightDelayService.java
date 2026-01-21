@@ -111,7 +111,7 @@ public class FlightDelayService {
             } else if (depIata != null && !depIata.isEmpty()) {
                 result = delayRepository.findByDepIata(depIata.toUpperCase());
             } else {
-                result = delayRepository.findAll();
+                result = delayRepository.findAllByOrderByIdDesc();
             }
             
             System.out.println("   Found " + result.size() + " flights from DB");
@@ -122,6 +122,21 @@ public class FlightDelayService {
    
     public List<DelayEntity> getAllDelays() {
         return delayRepository.findAll();
+    }
+    
+    /**
+     * Get all stored delays (ordered by newest first)
+     * This is for displaying all fetched delays
+     */
+    public List<DelayEntity> getAllStoredDelays() {
+        return delayRepository.findAllByOrderByIdDesc();
+    }
+    
+    /**
+     * Count total stored delays in database
+     */
+    public long countStoredDelays() {
+        return delayRepository.count();
     }
 
     

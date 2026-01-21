@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: vipcb04/airhub:latest
+    image: vipcb04/flight-schedules:latest
     container_name: flight-app
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d5n37bdactks73c7lj5g-a.singapore-postgres.render.com:5432/airlab

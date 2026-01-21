@@ -60,4 +60,10 @@ public interface DelayRepository extends JpaRepository<DelayEntity, Long> {
         String arrIata, 
         int minDelay
     );
+    
+    /**
+     * Find all stored delays ordered by ID desc (newest first)
+     * Used for displaying all fetched delays
+     */
+    List<DelayEntity> findAllByOrderByIdDesc();
 }
