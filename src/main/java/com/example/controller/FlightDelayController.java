@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,18 +23,27 @@ public class FlightDelayController {
         this.flightDelayService = flightDelayService;
     }
     
+ @ModelAttribute
+    public void addCommonAttributes(Model model) {
+        model.addAttribute("storedDelaysShown", false);
+    }
+
     @GetMapping
     public String delaysPage(Model model){
-        // NEW: Don't load any delays initially - show empty page
-        model.addAttribute("delays", new ArrayList<DelayEntity>());
+        if(!model.containsAttribute("delays"))
+        {
+            model.addAttribute("delays", new ArrayList<DelayEntity>());
+             model.addAttribute("showResults", false);
         
-        // Add count of stored delays for info
+        }
+        
+        
+       
         long storedCount = flightDelayService.countStoredDelays();
         model.addAttribute("storedCount", storedCount);
         model.addAttribute("storedDelaysShown", false);
         // Add cache info for monitoring
         model.addAttribute("cacheInfo", flightDelayService.getCacheInfo());
-         model.addAttribute("showResults", false);
         return "delays";
     }
     

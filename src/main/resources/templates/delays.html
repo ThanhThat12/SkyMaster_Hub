@@ -18,7 +18,7 @@
         <div th:if="${storedCount != null and storedCount > 0}" 
              style="background: #EBF8FF; border: 1px solid #90CDF4; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 24px;">💾</span>
+                
                 <div>
                     <strong style="color: #2C5282;">Database has <span th:text="${storedCount}">0</span> stored delays</strong>
                     <p style="margin: 5px 0 0 0; color: #4A5568; font-size: 14px;">
@@ -81,13 +81,13 @@
                         </div>
                         <div class="cache-meta">
                             <span>
-                                ✈️ <strong th:text="${entry.flightCount}">0</strong> flights
+                                 <strong th:text="${entry.flightCount}">0</strong> flights
                             </span>
                             <span>
-                                👁️ <strong th:text="${entry.hitCount}">0</strong> times
+                                 <strong th:text="${entry.hitCount}">0</strong> times
                             </span>
                             <span>
-                                💾 <strong th:text="${#numbers.formatDecimal(entry.sizeKB, 1, 1)}">0</strong> KB
+                                 <strong th:text="${#numbers.formatDecimal(entry.sizeKB, 1, 1)}">0</strong> KB
                             </span>
                         </div>
                     </div>
