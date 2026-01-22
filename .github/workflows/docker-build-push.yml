@@ -59,7 +59,12 @@ jobs:
       
     - name: Trigger deploy webhook
       run: |
+        BODY='{"event":"deploy","service":"airhub"}'
+        SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | sed 's/^.* //')
+
         curl -X POST \
           -H "Content-Type: application/json" \
-          -H "X-Hub-Signature-256: sha256=$(echo -n '{}' | openssl dgst -sha256 -hmac '${{ secrets.WEBHOOK_SECRET }}' | sed 's/^.* //')" \
+          -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
+          -d "$BODY" \
           http://67.202.3.146:8081/hooks/deploy-airhub
+
