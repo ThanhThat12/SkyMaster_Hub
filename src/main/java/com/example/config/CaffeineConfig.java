@@ -6,7 +6,7 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import com.example.entity.DelayEntity;
 import com.example.entity.RealtimeFlightEntity;
-import com.example.entity.ScheduleEntity;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,17 +31,17 @@ public class CaffeineConfig {
     }
 
     
-    @Bean(name = "flightScheduleCache")
-    public Cache<String, List<ScheduleEntity>> flightScheduleCache() {
-        return Caffeine.newBuilder()
-                .maximumSize(200)
-                .expireAfterWrite(5, TimeUnit.MINUTES)
-                .recordStats()
-                .removalListener((String key, List<ScheduleEntity> value, RemovalCause cause) -> {
-                    System.out.println(" Schedule cache evicted: " + key + " | " + cause);
-                })
-                .build();
-    }
+    // @Bean(name = "flightScheduleCache")
+    // public Cache<String, List<ScheduleEntity>> flightScheduleCache() {
+    //     return Caffeine.newBuilder()
+    //             .maximumSize(200)
+    //             .expireAfterWrite(5, TimeUnit.MINUTES)
+    //             .recordStats()
+    //             .removalListener((String key, List<ScheduleEntity> value, RemovalCause cause) -> {
+    //                 System.out.println(" Schedule cache evicted: " + key + " | " + cause);
+    //             })
+    //             .build();
+    // }
 
     
     @Bean(name = "searchCache")
