@@ -5,9 +5,9 @@ on:
     branches:
       - product
       - test
-  pull_request:
-    branches:
-      - product
+  # pull_request:
+  #   branches:
+  #     - product
 
 env:
   DOCKER_IMAGE_NAME: vipcb04/flight-schedules
