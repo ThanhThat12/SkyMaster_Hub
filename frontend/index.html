@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Schedules - Delays Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>✈️ Flight Delays Tracker</h1>
+            <p class="subtitle">Real-time flight delay monitoring with smart caching</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="delays">Delays</button>
+            <button class="tab-btn" data-tab="realtime">Realtime Flights</button>
+            <button class="tab-btn" data-tab="cache">Cache Stats</button>
+        </nav>
+
+        <!-- Delays Tab -->
+        <div class="tab-content active" id="delays-tab">
+            <div class="card">
+                <h2>Fetch Delayed Flights</h2>
+                <form id="fetch-form">
+                    <div class="form-group">
+                        <label>Type:</label>
+                        <select id="type" required>
+                            <option value="departures">Departures</option>
+                            <option value="arrivals">Arrivals</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Airport IATA Code:</label>
+                        <input type="text" id="iataCode" placeholder="e.g., SGN, HAN" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Min Delay (minutes):</label>
+                        <input type="number" id="minDelay" value="30" min="0" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        🔍 Fetch Delays
+                    </button>
+                </form>
+            </div>
+
+            <!-- Search Section -->
+            <div class="card">
+                <h2>Search in Database</h2>
+                <form id="search-form">
+                    <div class="form-row">
+                        <input type="text" id="searchIata" placeholder="Airport Code">
+                        <input type="text" id="searchAirline" placeholder="Airline Code">
+                        <input type="text" id="searchDepIata" placeholder="Departure Code">
+                        <button type="submit" class="btn btn-secondary">Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results -->
+            <div id="results-section" class="hidden">
+                <div class="results-header">
+                    <h2>Results</h2>
+                    <span id="results-count" class="badge">0 flights</span>
+                    <span id="response-time" class="badge badge-success"></span>
+                </div>
+                
+                <div id="flights-container" class="flights-grid"></div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Loading flights...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error" class="error hidden"></div>
+        </div>
+
+        <!-- Realtime Tab -->
+        <div class="tab-content" id="realtime-tab">
+            <div class="card">
+                <h2>Live Flight Tracking</h2>
+                <form id="realtime-form">
+                    <div class="form-group">
+                        <label>Departure Airport:</label>
+                        <input type="text" id="depIata" placeholder="e.g., SGN" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        🛫 Track Flights
+                    </button>
+                </form>
+            </div>
+
+            <div id="realtime-results" class="hidden">
+                <div class="results-header">
+                    <h2>Live Flights</h2>
+                    <span id="realtime-count" class="badge">0 flights</span>
+                </div>
+                <div id="realtime-container" class="flights-grid"></div>
+            </div>
+
+            <div id="realtime-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Loading realtime data...</p>
+            </div>
+
+            <div id="realtime-error" class="error hidden"></div>
+        </div>
+
+        <!-- Cache Stats Tab -->
+        <div class="tab-content" id="cache-tab">
+            <div class="card">
+                <h2>Cache Performance</h2>
+                <button id="load-cache-btn" class="btn btn-primary">Load Cache Stats</button>
+                <button id="clear-cache-btn" class="btn btn-danger">Clear Cache</button>
+            </div>
+
+            <div id="cache-stats" class="hidden">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Hit Rate</h3>
+                        <p id="hit-rate" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Cache Size</h3>
+                        <p id="cache-size" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Evictions</h3>
+                        <p id="evictions" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Hits</h3>
+                        <p id="total-hits" class="stat-value">-</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Cache Entries</h3>
+                    <div id="cache-entries"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
