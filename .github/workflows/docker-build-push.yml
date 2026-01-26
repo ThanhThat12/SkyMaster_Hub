@@ -3,10 +3,11 @@ name: Build and Push Docker Image with Auto Deploy
 on:
   push:
     branches:
-      - main
+      - product
+      - test
   pull_request:
     branches:
-      - main
+      - product
 
 env:
   DOCKER_IMAGE_NAME: vipcb04/flight-schedules
@@ -42,7 +43,7 @@ jobs:
       with:
         images: ${{ env.DOCKER_IMAGE_NAME }}
         tags: |
-          type=raw,value=latest
+          type=raw,value={{branch}}-latest
           type=sha,prefix={{branch}}-
           
     - name: Build and push Docker image

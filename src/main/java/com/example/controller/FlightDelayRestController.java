@@ -121,4 +121,37 @@ public class FlightDelayRestController {
         
         return ResponseEntity.ok(response);
     }
+    
+    /**
+     * Search delays in database by various criteria
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> searchDelays(
+            @RequestParam(required = false) String iataCode,
+            @RequestParam(required = false) String airline,
+            @RequestParam(required = false) String depIata) {
+        
+        try {
+            List<DelayEntity> delays = flightDelayService.searchDelayedFlights(iataCode, airline, depIata);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("count", delays.size());
+            response.put("data", delays);
+            response.put("searchParams", Map.of(
+                "iataCode", iataCode != null ? iataCode : "null",
+                "airline", airline != null ? airline : "null",
+                "depIata", depIata != null ? depIata : "null"
+            ));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }
