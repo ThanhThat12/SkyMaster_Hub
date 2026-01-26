@@ -58,7 +58,8 @@ jobs:
     - name: Image digest
       run: echo "Image pushed with digest ${{ steps.meta.outputs.digest }}"
       
-    - name: Trigger deploy webhook
+    - name: Trigger deploy test for webhook
+      if: github.ref == 'refs/heads/test'
       run: |
         BODY='{"event":"deploy","service":"airhub"}'
         SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | sed 's/^.* //')
@@ -67,5 +68,16 @@ jobs:
           -H "Content-Type: application/json" \
           -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
           -d "$BODY" \
-          http://67.202.3.146:8081/hooks/deploy-airhub
+          http://67.202.3.146:8081/hooks/deploy-airhub-test
 
+    - name: Trigger deploy product for webhook
+      if: github.ref == 'refs/heads/product'
+      run: |
+        BODY='{"event":"deploy","service":"airhub"}'
+        SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | sed 's/^.* //')
+
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
+          -d "$BODY" \
+          http://67.202.3.146:8081/hooks/deploy-airhub-product
