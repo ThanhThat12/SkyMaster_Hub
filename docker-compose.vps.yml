@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Production app
+  app-prod:
+    image: vipcb04/flight-schedules:product-latest
+    container_name: flight-app-prod
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-xxx:5432/airlab
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=production"
+
+  # Test app
+  app-test:
+    image: vipcb04/flight-schedules:test-latest
+    container_name: flight-app-test
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-xxx:5432/airlab_test
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=test"
+
+  # Watchtower - auto pull and restart containers
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true           # Xóa old images
+      - WATCHTOWER_POLL_INTERVAL=300      # Check mỗi 5 phút
+      - WATCHTOWER_INCLUDE_STOPPED=false  
+      - WATCHTOWER_LABEL_ENABLE=true      # Chỉ watch containers có label
+    restart: unless-stopped
