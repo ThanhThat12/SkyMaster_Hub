@@ -57,12 +57,13 @@ jobs:
         
     - name: Image digest
       run: echo "Image pushed with digest ${{ steps.meta.outputs.digest }}"
-      
+    - name: Debug event
+      run: |
+        echo "EVENT=$GITHUB_EVENT_NAME"
+        echo "REF=$GITHUB_REF"
+
     - name: Trigger deploy test for webhook
       if: github.ref == 'refs/heads/test'
-
-
-
       
       run: |
         BODY='{"event":"deploy","service":"airhub"}'
