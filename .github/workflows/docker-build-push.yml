@@ -57,6 +57,8 @@ jobs:
     - name: Image digest
       run: echo "Image pushed with digest ${{ steps.meta.outputs.digest }}"
       
+
+      
     - name: Trigger deploy webhook
       run: |
         BODY='{"event":"deploy","service":"airhub"}'
