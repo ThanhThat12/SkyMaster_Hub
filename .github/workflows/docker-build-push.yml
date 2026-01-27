@@ -64,7 +64,7 @@ jobs:
 
     - name: Trigger deploy test for webhook
       if: github.ref == 'refs/heads/test'
-      
+
       run: |
         BODY='{"event":"deploy","service":"airhub"}'
         SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | sed 's/^.* //')
