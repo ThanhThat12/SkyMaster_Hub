@@ -83,6 +83,7 @@ jobs:
         BODY='{"event":"deploy","service":"airhub"}'
         SIGNATURE=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
 
+        
 
         curl -X POST \
           -H "Content-Type: application/json" \
