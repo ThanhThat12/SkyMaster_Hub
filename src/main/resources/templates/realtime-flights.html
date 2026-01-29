@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-time Flight Tracker</title>
-     <link rel="stylesheet" th:href="@{/realtime.css}">
-   
+    <style th:replace="fragments/navbar :: navbar-css"></style>
+    <link rel="stylesheet" th:href="@{/realtime.css}">
 </head>
 <body>
+    <nav th:replace="fragments/navbar :: navbar"></nav>
     <div class="container">
         <h1> Real-time Flight Tracker</h1>
 
