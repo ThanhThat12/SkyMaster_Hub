@@ -21,10 +21,7 @@ public interface DelayRepository extends JpaRepository<DelayEntity, Long> {
     
     List<DelayEntity> findByArrIata(String arrIata);
     
-    /**
-     * Count flights by query type and IATA code
-     * Used to verify cache-DB sync
-     */
+   
     @Query("SELECT COUNT(d) FROM DelayEntity d WHERE " +
            "(:queryType IS NULL OR d.queryType = :queryType) AND " +
            "(:iataCode IS NULL OR d.iataCode = :iataCode)")
@@ -33,37 +30,25 @@ public interface DelayRepository extends JpaRepository<DelayEntity, Long> {
         @Param("iataCode") String iataCode
     );
     
-    /**
-     * Delete flights by IATA code
-     * Used when re-syncing cache to DB
-     */
+   
     @Modifying
     @Query("DELETE FROM DelayEntity d WHERE d.iataCode = :iataCode")
     void deleteByIataCode(@Param("iataCode") String iataCode);
     
-    /**
-     * Find flights for departures query (TIER 2 DB lookup)
-     * Used in 3-tier caching strategy
-     */
+    
     List<DelayEntity> findByQueryTypeAndDepIataAndMinDelayGreaterThanEqual(
         String queryType, 
         String depIata, 
         int minDelay
     );
     
-    /**
-     * Find flights for arrivals query (TIER 2 DB lookup)
-     * Used in 3-tier caching strategy
-     */
+   
     List<DelayEntity> findByQueryTypeAndArrIataAndMinDelayGreaterThanEqual(
         String queryType, 
         String arrIata, 
         int minDelay
     );
     
-    /**
-     * Find all stored delays ordered by ID desc (newest first)
-     * Used for displaying all fetched delays
-     */
+   
     List<DelayEntity> findAllByOrderByIdDesc();
 }
