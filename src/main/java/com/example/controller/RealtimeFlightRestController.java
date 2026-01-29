@@ -19,9 +19,7 @@ public class RealtimeFlightRestController {
         this.realtimeFlightService = realtimeFlightService;
     }
 
-    /**
-     * ✅ Fetch realtime flights with response time tracking
-     */
+  
     @GetMapping
     public ResponseEntity<?> getRealtimeFlights(
             @RequestParam(name = "dep_iata") String depIata) {
