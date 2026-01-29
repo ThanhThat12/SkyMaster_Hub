@@ -48,7 +48,40 @@ public interface DelayRepository extends JpaRepository<DelayEntity, Long> {
         String arrIata, 
         int minDelay
     );
+
+    List<DelayEntity> findByAirlineIataAndMinDelayGreaterThanEqual(
+        String airlineIata, 
+        int minDelay
+    );
     
-   
+    /**
+     * Find delays by query type (airline), airline IATA code, and minimum delay
+     * Used for airline-based delay queries
+     */
+    List<DelayEntity> findByQueryTypeAndAirlineIataAndMinDelayGreaterThanEqual(
+        String queryType,
+        String airlineIata, 
+        int minDelay
+    );
+    
     List<DelayEntity> findAllByOrderByIdDesc();
+
+    
+    
+    /**
+     * Count total flights by airline
+     */
+    @Query("SELECT COUNT(d) FROM DelayEntity d WHERE d.airlineIata = :airlineIata")
+    long countByAirlineIata(@Param("airlineIata") String airlineIata);
+    
+    /**
+     * Get airline statistics (for future use)
+     */
+    @Query("SELECT d.airlineIata, COUNT(d), AVG(d.delayMinutes), " +
+           "MIN(d.delayMinutes), MAX(d.delayMinutes) " +
+           "FROM DelayEntity d " +
+           "WHERE d.airlineIata IS NOT NULL " +
+           "GROUP BY d.airlineIata " +
+           "ORDER BY AVG(d.delayMinutes) ASC")
+    List<Object[]> getAirlineStatistics();
 }

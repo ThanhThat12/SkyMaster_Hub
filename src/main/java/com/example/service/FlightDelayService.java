@@ -13,7 +13,6 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.checkerframework.checker.units.qual.min;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -119,6 +118,107 @@ public class FlightDelayService {
         });
     }
 
+    
+    public List<DelayEntity> getDelaysByAirline(String airlineIata, int minDelay) {
+    String cacheKey = buildAirlineCacheKey(airlineIata, minDelay);
+    
+    try {
+        List<DelayEntity> flights = cache.get(cacheKey, key -> {
+            System.out.println(" Cache MISS - Checking database for airline: " + airlineIata);
+            
+            // Check DB first
+            List<DelayEntity> dbFlights = queryDatabaseByAirline(airlineIata, minDelay);
+            
+            if (!dbFlights.isEmpty()) {
+                System.out.println(" DB HIT - Found " + dbFlights.size() + " flights in database");
+                return dbFlights;
+            }
+            
+            // DB miss -> call API
+            System.out.println(" DB MISS - Fetching from API for airline: " + airlineIata);
+            try {
+                List<DelayEntity> fetchedFlights = fetchFromAPIByAirline(airlineIata, minDelay);
+                
+                if (!fetchedFlights.isEmpty()) {
+                    saveToDatabase("airline", airlineIata, minDelay, fetchedFlights);
+                    System.out.println(" API SUCCESS - Fetched " + fetchedFlights.size() + " flights, saved to DB");
+                } else {
+                    System.out.println(" API returned empty results for airline: " + airlineIata);
+                }
+                
+                return fetchedFlights;
+            } catch (Exception e) {
+                System.err.println(" API ERROR: " + e.getMessage());
+                return new ArrayList<>();
+            }
+        });
+        
+        if (flights != null && !flights.isEmpty()) {
+            hitcountMap.computeIfAbsent(cacheKey, k -> new AtomicLong(0)).incrementAndGet();
+        }
+        
+        return flights;
+        
+    } catch (Exception e) {
+        System.err.println(" Error in getDelaysByAirline: " + e.getMessage());
+        return new ArrayList<>();
+    }
+}
+
+    private String buildAirlineCacheKey(String airlineIata, int minDelay)
+    {
+        return String.format("airline|%s|%d", airlineIata, minDelay);
+    }
+
+    private List<DelayEntity> fetchFromAPIByAirline(String airlineIata, int minDelay) throws Exception {
+    String apiUrl = String.format(
+        "https://airlabs.co/api/v9/delays?airline_iata=%s&delay=%d&api_key=%s",
+        airlineIata.toUpperCase(),
+        minDelay,
+        API_KEY
+    );
+    
+    System.out.println("📡 API URL: " + apiUrl.replace(API_KEY, "***"));
+    
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        HttpGet request = new HttpGet(apiUrl);
+        
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            String jsonResponse = EntityUtils.toString(response.getEntity());
+            
+            JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+            JsonArray responseArray = jsonObject.getAsJsonArray("response");
+            
+            if (responseArray == null || responseArray.isEmpty()) {
+                return new ArrayList<>();
+            }
+            
+            List<DelayEntity> flights = new ArrayList<>();
+            for (JsonElement element : responseArray) {
+                JsonObject flight = element.getAsJsonObject();
+                
+                DelayEntity entity = new DelayEntity();
+                entity.setQueryType("airline");
+                entity.setIataCode(airlineIata.toUpperCase());
+                entity.setMinDelay(minDelay);
+            
+                entity.setAirlineIata(getString(flight, "airline_iata"));
+                entity.setFlightIata(getString(flight, "flight_iata"));
+                entity.setFlightNumber(getString(flight, "flight_number"));
+                entity.setDepIata(getString(flight, "dep_iata"));
+                entity.setDepTime(getString(flight, "dep_time"));
+                entity.setArrIata(getString(flight, "arr_iata"));
+                entity.setArrTime(getString(flight, "arr_time"));
+                entity.setDelayMinutes(getInteger(flight, "delayed"));
+                
+                flights.add(entity);
+            }
+            
+            return flights;
+        }
+    }
+}
+
    
     public List<DelayEntity> getAllDelays() {
         return delayRepository.findAll();
@@ -207,6 +307,20 @@ public class FlightDelayService {
                 minDelay
             );
         }
+        
+        return results != null ? results : new ArrayList<>();
+    }
+    
+    /**
+     * Query database by airline IATA code
+     */
+    private List<DelayEntity> queryDatabaseByAirline(String airlineIata, int minDelay) {
+        List<DelayEntity> results = delayRepository
+            .findByAirlineIataAndMinDelayGreaterThanEqual(
+            
+                airlineIata.toUpperCase(),
+                minDelay
+            );
         
         return results != null ? results : new ArrayList<>();
     }

@@ -1,43 +1,52 @@
-// package com.example.config;
+package com.example.config;
 
-// import org.springframework.context.annotation.Bean;
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.web.cors.CorsConfiguration;
-// import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-// import org.springframework.web.filter.CorsFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
-// import java.util.Arrays;
+import java.util.Arrays;
 
-// @Configuration
-// public class CorsConfig {
+/**
+ * CORS Configuration for REST API endpoints
+ * Allows frontend applications from different domains to access the API
+ */
+@Configuration
+public class CorsConfig {
 
-//     @Bean
-//     public CorsFilter corsFilter() {
-//         CorsConfiguration config = new CorsConfiguration();
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
         
-//         // Cho phép frontend gọi API (development)
-//         config.setAllowedOrigins(Arrays.asList(
-//             "http://localhost:3000",     // React default
-//             "http://localhost:5173",     // Vite default
-//             "http://localhost:4200",     // Angular default
-//             "http://localhost:8081"      // Hoặc port khác bạn chọn
-//         ));
+        // Allow frontend from different origins (development & production)
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",     // React default
+            "http://localhost:5173",     // Vite default
+            "http://localhost:4200",     // Angular default
+            "http://localhost:8080",     // Same origin
+            "http://localhost:8081",     // Alternative port
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173"
+        ));
         
-//         // Cho phép các HTTP methods
-//         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Allow all HTTP methods
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         
-//         // Cho phép headers
-//         config.setAllowedHeaders(Arrays.asList("*"));
+        // Allow all headers
+        config.setAllowedHeaders(Arrays.asList("*"));
         
-//         // Cho phép credentials (cookies, authorization headers)
-//         config.setAllowCredentials(true);
+        // Allow credentials (cookies, authorization headers)
+        config.setAllowCredentials(true);
         
-//         // Thời gian cache preflight request (seconds)
-//         config.setMaxAge(3600L);
+        // Cache preflight request for 1 hour
+        config.setMaxAge(3600L);
         
-//         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//         source.registerCorsConfiguration("/api/**", config);
+        // Apply CORS configuration to all /api/** endpoints
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
         
-//         return new CorsFilter(source);
-//     }
-// }
+        return new CorsFilter(source);
+    }
+}
+

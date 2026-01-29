@@ -66,6 +66,51 @@ public class FlightDelayController {
         return "redirect:/delays";
     }
     
+    /**
+     * NEW: Fetch delayed flights by airline IATA code
+     */
+    @PostMapping("/fetch-by-airline")
+    public String fetchDelaysByAirline(
+        @RequestParam String airlineIata,
+        @RequestParam(defaultValue = "30") int minDelay,
+        RedirectAttributes redirectAttributes) {
+        
+        try {
+            // Validate input
+            if (airlineIata == null || airlineIata.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "❌ Please enter a valid airline IATA code");
+                return "redirect:/delays";
+            }
+            
+            // Fetch delays by airline
+            List<DelayEntity> flights = flightDelayService.getDelaysByAirline(
+                airlineIata.trim().toUpperCase(), 
+                minDelay
+            );
+            
+            // Success message
+            String message = String.format(
+                "✈️ Found %d delayed flights for airline %s (min delay: %d minutes)",
+                flights.size(),
+                airlineIata.toUpperCase(),
+                minDelay
+            );
+            
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            redirectAttributes.addFlashAttribute("delays", flights);
+            redirectAttributes.addFlashAttribute("showResults", true);
+            redirectAttributes.addFlashAttribute("searchType", "airline");
+            redirectAttributes.addFlashAttribute("searchedAirline", airlineIata.toUpperCase());
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "❌ Error fetching airline delays: " + e.getMessage());
+        }
+        
+        return "redirect:/delays";
+    }
+    
     @GetMapping("/search")
     public String searchDelays(
         @RequestParam(required = false) String iataCode,
